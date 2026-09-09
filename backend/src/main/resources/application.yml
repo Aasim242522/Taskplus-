@@ -1,0 +1,39 @@
+spring:
+  application:
+    name: task-monitoring-system
+  profiles:
+    active: dev
+  jpa:
+    open-in-view: false
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+
+app:
+  jwt:
+    secret: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+    expiration-ms: 86400000 # 24 hours
+    refresh-expiration-ms: 604800000 # 7 days
+  gamification:
+    base-points: 50
+    on-time-bonus: 25
+    streak-multiplier: 2.5
+    overdue-penalty: 15
+    daily-diminishing-cap: 500
+  scheduler:
+    streak-cron: "0 0 0 * * *" # Daily midnight
+    overdue-detector-cron: "0 0/15 * * * *" # Every 15 minutes
+    metrics-aggregation-cron: "0 5 0 * * *" # Daily 00:05
+    reminder-cron: "0 0/10 * * * *" # Every 10 minutes
+
+server:
+  port: 8080
+  servlet:
+    context-path: /
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
