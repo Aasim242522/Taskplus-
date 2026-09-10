@@ -9,14 +9,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
-
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-@Repository
 public interface TaskRepository extends JpaRepository<Task, UUID>, JpaSpecificationExecutor<Task> {
 
     Optional<Task> findByIdAndUserId(UUID id, UUID userId);
@@ -55,31 +52,31 @@ public interface TaskRepository extends JpaRepository<Task, UUID>, JpaSpecificat
 
     long countByUserIdAndCategoryNameAndStatus(UUID userId, String categoryName, TaskStatus status);
 
-    @Query("SELECT FUNCTION('DATE', t.completedAt), COUNT(t), COALESCE(SUM(t.actualDurationMinutes), 0) " +
+    @Query("SELECT CAST(t.completedAt AS LocalDate), COUNT(t), COALESCE(SUM(t.actualDurationMinutes), 0) " +
            "FROM Task t WHERE t.user.id = :userId AND t.status = 'COMPLETED' " +
            "AND t.completedAt >= :startDate AND t.completedAt <= :endDate " +
-           "GROUP BY FUNCTION('DATE', t.completedAt) " +
-           "ORDER BY FUNCTION('DATE', t.completedAt) ASC")
+           "GROUP BY CAST(t.completedAt AS LocalDate) " +
+           "ORDER BY CAST(t.completedAt AS LocalDate) ASC")
     List<Object[]> aggregateCompletedByDate(
             @Param("userId") UUID userId,
             @Param("startDate") Instant startDate,
             @Param("endDate") Instant endDate
     );
 
-    @Query("SELECT FUNCTION('DATE', t.createdAt), COUNT(t) " +
+    @Query("SELECT CAST(t.createdAt AS LocalDate), COUNT(t) " +
            "FROM Task t WHERE t.user.id = :userId " +
            "AND t.createdAt >= :startDate AND t.createdAt <= :endDate " +
-           "GROUP BY FUNCTION('DATE', t.createdAt)")
+           "GROUP BY CAST(t.createdAt AS LocalDate)")
     List<Object[]> aggregateCreatedByDate(
             @Param("userId") UUID userId,
             @Param("startDate") Instant startDate,
             @Param("endDate") Instant endDate
     );
 
-    @Query("SELECT FUNCTION('DATE', t.dueDateTime), COUNT(t) " +
+    @Query("SELECT CAST(t.dueDateTime AS LocalDate), COUNT(t) " +
            "FROM Task t WHERE t.user.id = :userId AND t.status = 'OVERDUE' " +
            "AND t.dueDateTime >= :startDate AND t.dueDateTime <= :endDate " +
-           "GROUP BY FUNCTION('DATE', t.dueDateTime)")
+           "GROUP BY CAST(t.dueDateTime AS LocalDate)")
     List<Object[]> aggregateOverdueByDate(
             @Param("userId") UUID userId,
             @Param("startDate") Instant startDate,

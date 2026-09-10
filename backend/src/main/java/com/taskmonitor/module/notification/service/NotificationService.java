@@ -7,8 +7,6 @@ import com.taskmonitor.module.notification.domain.NotificationType;
 import com.taskmonitor.module.notification.dto.NotificationResponse;
 import com.taskmonitor.module.notification.repository.NotificationRepository;
 import com.taskmonitor.module.user.domain.User;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -19,8 +17,6 @@ import java.util.UUID;
 
 @Service
 public class NotificationService {
-
-    private static final Logger log = LoggerFactory.getLogger(NotificationService.class);
 
     private final NotificationRepository notificationRepository;
 

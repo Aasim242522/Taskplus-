@@ -1,4 +1,4 @@
-﻿# Java & Maven
+# Java & Maven
 backend/target/
 backend/*.log
 backend/.flattened-pom.xml
@@ -15,6 +15,9 @@ frontend/yarn-error.log*
 .idea/
 *.iml
 .vscode/
+.settings/
+.project
+.classpath
 *.swp
 *.swo
 

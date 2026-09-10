@@ -1,7 +1,6 @@
 package com.taskmonitor.module.gamification;
 
 import com.taskmonitor.module.gamification.domain.PointsLedger;
-import com.taskmonitor.module.gamification.domain.Streak;
 import com.taskmonitor.module.gamification.repository.PointsLedgerRepository;
 import com.taskmonitor.module.gamification.repository.StreakRepository;
 import com.taskmonitor.module.gamification.service.PointService;

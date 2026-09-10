@@ -3,11 +3,8 @@ package com.taskmonitor.module.analytics.service;
 import com.taskmonitor.module.analytics.dto.HeatmapDayResponse;
 import com.taskmonitor.module.analytics.dto.MonthlyAnalyticsResponse;
 import com.taskmonitor.module.analytics.dto.WeeklyAnalyticsResponse;
-import com.taskmonitor.module.analytics.repository.DailyTaskMetricRepository;
 import com.taskmonitor.module.gamification.repository.PointsLedgerRepository;
 import com.taskmonitor.module.task.repository.TaskRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,17 +16,12 @@ import java.util.*;
 @Service
 public class AnalyticsService {
 
-    private static final Logger log = LoggerFactory.getLogger(AnalyticsService.class);
-
     private final TaskRepository taskRepository;
-    private final DailyTaskMetricRepository metricRepository;
     private final PointsLedgerRepository pointsLedgerRepository;
 
     public AnalyticsService(TaskRepository taskRepository,
-                            DailyTaskMetricRepository metricRepository,
                             PointsLedgerRepository pointsLedgerRepository) {
         this.taskRepository = taskRepository;
-        this.metricRepository = metricRepository;
         this.pointsLedgerRepository = pointsLedgerRepository;
     }
 
@@ -114,10 +106,10 @@ public class AnalyticsService {
 
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-        int totalCreated = createdMap.values().stream().mapToInt(Integer::intValue).sum();
-        int totalCompleted = completedMap.values().stream().mapToInt(Integer::intValue).sum();
-        int totalOverdue = overdueMap.values().stream().mapToInt(Integer::intValue).sum();
-        int totalPoints = pointsMap.values().stream().mapToInt(Integer::intValue).sum();
+        int totalCreated = createdMap.values().stream().mapToInt(v -> v != null ? v : 0).sum();
+        int totalCompleted = completedMap.values().stream().mapToInt(v -> v != null ? v : 0).sum();
+        int totalOverdue = overdueMap.values().stream().mapToInt(v -> v != null ? v : 0).sum();
+        int totalPoints = pointsMap.values().stream().mapToInt(v -> v != null ? v : 0).sum();
 
         List<MonthlyAnalyticsResponse.DailyTrendPoint> trendPoints = new ArrayList<>();
         int daysInMonth = ym.lengthOfMonth();

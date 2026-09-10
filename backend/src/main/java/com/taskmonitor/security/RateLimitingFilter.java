@@ -2,7 +2,6 @@ package com.taskmonitor.security;
 
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
-import io.github.bucket4j.Refill;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -11,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -29,15 +29,17 @@ public class RateLimitingFilter extends OncePerRequestFilter {
 
     // 10 attempts per minute for auth endpoints
     private Bucket createAuthBucket() {
-        Refill refill = Refill.intervally(10, Duration.ofMinutes(1));
-        Bandwidth limit = Bandwidth.classic(10, refill);
+        Bandwidth limit = Bandwidth.builder()
+                .capacity(10)
+                .refillIntervally(10, Duration.ofMinutes(1))
+                .build();
         return Bucket.builder().addLimit(limit).build();
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(@NonNull HttpServletRequest request,
+                                    @NonNull HttpServletResponse response,
+                                    @NonNull FilterChain filterChain) throws ServletException, IOException {
         String path = request.getRequestURI();
 
         // Apply rate limiting strictly to sensitive authentication endpoints

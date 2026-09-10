@@ -6,14 +6,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
-
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-@Repository
 public interface PointsLedgerRepository extends JpaRepository<PointsLedger, UUID> {
 
     Page<PointsLedger> findByUserIdOrderByCreatedAtDesc(UUID userId, Pageable pageable);
@@ -28,10 +25,10 @@ public interface PointsLedgerRepository extends JpaRepository<PointsLedger, UUID
            "WHERE p.user.id = :userId AND p.createdAt >= :start AND p.createdAt <= :end AND p.pointsDelta > 0")
     int sumPointsEarnedBetween(@Param("userId") UUID userId, @Param("start") Instant start, @Param("end") Instant end);
 
-    @Query("SELECT FUNCTION('DATE', p.createdAt), COALESCE(SUM(p.pointsDelta), 0) " +
+    @Query("SELECT CAST(p.createdAt AS LocalDate), COALESCE(SUM(p.pointsDelta), 0) " +
            "FROM PointsLedger p " +
            "WHERE p.user.id = :userId AND p.createdAt >= :start AND p.createdAt <= :end AND p.pointsDelta > 0 " +
-           "GROUP BY FUNCTION('DATE', p.createdAt)")
+           "GROUP BY CAST(p.createdAt AS LocalDate)")
     List<Object[]> aggregatePointsByDate(@Param("userId") UUID userId, @Param("start") Instant start, @Param("end") Instant end);
 
     @Query("SELECT COALESCE(SUM(p.pointsDelta), 0) FROM PointsLedger p " +
