@@ -44,8 +44,6 @@ public class DatabaseConfig {
 
     @Bean
     public DataSource dataSource() {
-        HikariConfig config = new HikariConfig();
-
         if (rawDatabaseUrl == null || rawDatabaseUrl.isBlank() || rawDatabaseUrl.contains("YOUR_DATABASE_URL_HERE")) {
             log.error("DATABASE_URL is not configured properly. Current value: '{}'", rawDatabaseUrl);
             throw new IllegalArgumentException(
@@ -54,38 +52,39 @@ public class DatabaseConfig {
             );
         }
 
+        HikariConfig config = new HikariConfig();
+
         String finalJdbcUrl = rawDatabaseUrl;
         String finalUsername = defaultUsername;
         String finalPassword = defaultPassword;
 
         if (rawDatabaseUrl.startsWith("postgres://") || rawDatabaseUrl.startsWith("postgresql://")) {
-                try {
-                    URI uri = new URI(rawDatabaseUrl);
-                    String userInfo = uri.getUserInfo();
-                    if (userInfo != null && !userInfo.isBlank()) {
-                        String[] userParts = userInfo.split(":", 2);
-                        if (userParts.length > 0 && !userParts[0].isEmpty()) {
-                            finalUsername = userParts[0];
-                        }
-                        if (userParts.length > 1) {
-                            finalPassword = userParts[1];
-                        }
+            try {
+                URI uri = new URI(rawDatabaseUrl);
+                String userInfo = uri.getUserInfo();
+                if (userInfo != null && !userInfo.isBlank()) {
+                    String[] userParts = userInfo.split(":", 2);
+                    if (userParts.length > 0 && !userParts[0].isEmpty()) {
+                        finalUsername = userParts[0];
                     }
-
-                    String host = uri.getHost();
-                    int port = uri.getPort() != -1 ? uri.getPort() : 5432;
-                    String path = uri.getPath(); // includes leading '/'
-                    String query = uri.getQuery();
-
-                    finalJdbcUrl = "jdbc:postgresql://" + host + ":" + port + path;
-                    if (query != null && !query.isBlank()) {
-                        finalJdbcUrl += "?" + query;
+                    if (userParts.length > 1) {
+                        finalPassword = userParts[1];
                     }
-                    log.info("Converted Render database URL to standard JDBC URL: jdbc:postgresql://{}:{}{}", host, port, path);
-                } catch (URISyntaxException e) {
-                    log.warn("Could not parse database URL via URI, falling back to prefix replacement: {}", e.getMessage());
-                    finalJdbcUrl = rawDatabaseUrl.replaceFirst("^postgres(ql)?://", "jdbc:postgresql://");
                 }
+
+                String host = uri.getHost();
+                int port = uri.getPort() != -1 ? uri.getPort() : 5432;
+                String path = uri.getPath(); // includes leading '/'
+                String query = uri.getQuery();
+
+                finalJdbcUrl = "jdbc:postgresql://" + host + ":" + port + path;
+                if (query != null && !query.isBlank()) {
+                    finalJdbcUrl += "?" + query;
+                }
+                log.info("Converted Render database URL to standard JDBC URL: jdbc:postgresql://{}:{}{}", host, port, path);
+            } catch (URISyntaxException e) {
+                log.warn("Could not parse database URL via URI, falling back to prefix replacement: {}", e.getMessage());
+                finalJdbcUrl = rawDatabaseUrl.replaceFirst("^postgres(ql)?://", "jdbc:postgresql://");
             }
         }
 
