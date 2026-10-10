@@ -46,12 +46,19 @@ public class DatabaseConfig {
     public DataSource dataSource() {
         HikariConfig config = new HikariConfig();
 
+        if (rawDatabaseUrl == null || rawDatabaseUrl.isBlank() || rawDatabaseUrl.contains("YOUR_DATABASE_URL_HERE")) {
+            log.error("DATABASE_URL is not configured properly. Current value: '{}'", rawDatabaseUrl);
+            throw new IllegalArgumentException(
+                    "DATABASE_URL is not set or still contains the placeholder 'YOUR_DATABASE_URL_HERE'. " +
+                    "Please update DATABASE_URL in your Render Environment Variables with your PostgreSQL connection string."
+            );
+        }
+
         String finalJdbcUrl = rawDatabaseUrl;
         String finalUsername = defaultUsername;
         String finalPassword = defaultPassword;
 
-        if (rawDatabaseUrl != null && !rawDatabaseUrl.isBlank()) {
-            if (rawDatabaseUrl.startsWith("postgres://") || rawDatabaseUrl.startsWith("postgresql://")) {
+        if (rawDatabaseUrl.startsWith("postgres://") || rawDatabaseUrl.startsWith("postgresql://")) {
                 try {
                     URI uri = new URI(rawDatabaseUrl);
                     String userInfo = uri.getUserInfo();
