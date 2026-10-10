@@ -98,6 +98,8 @@ public class SecurityConfig {
         Set<String> origins = new LinkedHashSet<>();
         origins.add("http://localhost:5173");
         origins.add("http://localhost:3000");
+        origins.add("https://taskplus-kappa.vercel.app");
+        origins.add("https://*.vercel.app");
 
         if (corsAllowedOrigins != null && !corsAllowedOrigins.isBlank()) {
             Arrays.stream(corsAllowedOrigins.split(","))
