@@ -40,7 +40,10 @@ public class RateLimitingFilter extends OncePerRequestFilter {
     protected void doFilterInternal(@NonNull HttpServletRequest request,
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
-        String path = request.getRequestURI();
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         // Apply rate limiting strictly to sensitive authentication endpoints
         if (path.startsWith("/api/v1/auth/login") || path.startsWith("/api/v1/auth/register")) {

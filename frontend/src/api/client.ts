@@ -1,7 +1,14 @@
 import axios from 'axios';
 
+// Derive base API URL from environment variable (Vercel) with fallback to localhost for local dev
+const rawApiUrl = (import.meta.env.VITE_API_URL as string | undefined) || 'http://localhost:8080';
+const normalizedBase = rawApiUrl.replace(/\/+$/, '');
+const baseURL = normalizedBase.endsWith('/api/v1')
+  ? normalizedBase
+  : `${normalizedBase}/api/v1`;
+
 const apiClient = axios.create({
-  baseURL: '/api/v1',
+  baseURL,
   headers: {
     'Content-Type': 'application/json',
   },

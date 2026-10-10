@@ -154,3 +154,86 @@ docker-compose up --build -d
 - `GET /weekly`: 7-day daily metrics, completion rate, avg points/day
 - `GET /monthly`: 30-day velocity, focus minutes, monthly completion rate
 - `GET /heatmap?days=60`: Day-by-day contribution intensity
+
+---
+
+## 🚀 Free Cloud Deployment Guide
+
+This guide walks you through deploying **TaskPulse** completely free online using:
+- **Database:** Managed PostgreSQL (Free on [Neon](https://neon.tech) or [Render](https://render.com))
+- **Backend:** Spring Boot 3.3 REST API (Docker Web Service on [Render](https://render.com))
+- **Frontend:** React 18 + Vite SPA (Free on [Vercel](https://vercel.com))
+
+---
+
+### Step 1: Provision Free PostgreSQL Database
+
+You can use either **Neon** or **Render**:
+
+#### Option A: Neon (Recommended for instant setup & no cold sleep)
+1. Sign up at [neon.tech](https://neon.tech) and click **Create Project**.
+2. Name your database `taskdb` and select the region closest to you.
+3. In the Neon dashboard, copy the **Connection string** (it looks like `postgres://neondb_owner:***@ep-xyz.us-east-2.aws.neon.tech/neondb?sslmode=require`).
+
+#### Option B: Render PostgreSQL
+1. Sign up at [render.com](https://render.com).
+2. Click **New +** -> **PostgreSQL**.
+3. Name it `taskpulse-db`, set database name to `taskdb`, select the **Free** tier.
+4. Once provisioned, copy the **Internal Database URL** (if backend is on Render) or **External Database URL**.
+
+---
+
+### Step 2: Deploy Backend to Render
+
+#### Option A: Using the Blueprint (`render.yaml`)
+1. Push your repository to GitHub.
+2. In the Render Dashboard, click **New +** -> **Blueprint**.
+3. Connect your `Taskplus-` GitHub repository. Render reads [render.yaml](file:///C:/Users/admin/.gemini/antigravity-ide/scratch/Taskplus-/render.yaml) and creates both the database and web service automatically.
+
+#### Option B: Manual Docker Web Service
+1. In Render, click **New +** -> **Web Service**.
+2. Connect your GitHub repository.
+3. Configure the service:
+   - **Name:** `taskpulse-backend`
+   - **Region:** Same region as your database
+   - **Root Directory:** `backend`
+   - **Runtime:** `Docker`
+   - **Instance Type:** `Free`
+4. Under **Environment Variables**, add:
+   - `SPRING_PROFILES_ACTIVE`: `prod`
+   - `PORT`: `8080`
+   - `DATABASE_URL`: Your PostgreSQL connection URL from Step 1 (e.g. `postgres://user:password@host:5432/dbname`)
+   - `JWT_SECRET`: A secure random 64+ hex string (e.g., `404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970`)
+   - `CORS_ALLOWED_ORIGINS`: Temporary placeholder `http://localhost:5173` (we'll update this with your Vercel URL in Step 4)
+5. Click **Create Web Service**. Wait for the Docker multi-stage build to finish.
+6. Once deployed, copy your backend URL (e.g. `https://taskpulse-backend.onrender.com`).
+   - Test health check: `https://taskpulse-backend.onrender.com/actuator/health` (should return `{"status":"UP"}`).
+
+---
+
+### Step 3: Deploy Frontend to Vercel
+
+1. Sign up/Log in at [vercel.com](https://vercel.com).
+2. Click **Add New...** -> **Project** and import your `Taskplus-` repository.
+3. In the project configuration:
+   - **Framework Preset:** `Vite`
+   - **Root Directory:** Click *Edit* and select `frontend`
+4. Expand **Environment Variables** and add:
+   - **Key:** `VITE_API_URL`
+   - **Value:** Your Render backend URL from Step 2 (e.g. `https://taskpulse-backend.onrender.com`)
+5. Click **Deploy**.
+6. When deployment finishes, copy your live frontend URL (e.g. `https://taskpulse-frontend.vercel.app`).
+
+---
+
+### Step 4: Link Frontend & Backend (Final Wiring)
+
+1. Return to the **Render Dashboard** -> Open your `taskpulse-backend` service.
+2. Go to **Environment** tab.
+3. Update `CORS_ALLOWED_ORIGINS` to your Vercel domain:
+   ```
+   https://taskpulse-frontend.vercel.app
+   ```
+   *(If you have multiple domains or custom domains, separate them with commas: `https://taskpulse-frontend.vercel.app,http://localhost:5173`)*
+4. Render will automatically redeploy the backend with the new CORS origin.
+5. Open your live Vercel app in your browser, register a user account, and start tracking daily tasks!
