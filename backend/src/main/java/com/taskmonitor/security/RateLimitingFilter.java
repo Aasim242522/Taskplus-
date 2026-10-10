@@ -45,6 +45,8 @@ public class RateLimitingFilter extends OncePerRequestFilter {
             return;
         }
 
+        String path = request.getRequestURI();
+
         // Apply rate limiting strictly to sensitive authentication endpoints
         if (path.startsWith("/api/v1/auth/login") || path.startsWith("/api/v1/auth/register")) {
             String clientIp = getClientIp(request);
